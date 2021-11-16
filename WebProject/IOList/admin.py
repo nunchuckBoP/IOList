@@ -27,7 +27,7 @@ class CardAdmin(admin.ModelAdmin):
 admin.site.register(Card, CardAdmin)
 
 class PointAdmin(admin.ModelAdmin):
-    list_display = ['number', 'card', 'tag', 'description_1', 'description_2', 'description_3', 'description_4']
+    list_display = ['number', 'card', 'tag', 'address', 'description_1', 'description_2', 'description_3', 'description_4']
 admin.site.register(Point, PointAdmin)
 
 class BusDeviceAdmin(admin.ModelAdmin):

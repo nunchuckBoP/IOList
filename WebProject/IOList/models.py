@@ -52,23 +52,107 @@ class Chassis(Device):
         unique_together = ('io_list', 'address')
 
 class ValveBank(Chassis):
-    pass
+    SINT_DATA = 4
+    DINT_DATA = 8
+    FORMATS = [
+        (SINT_DATA, "SINT DATA"),
+        (DINT_DATA, "DINT_DATA")
+    ]
+    data_format = models.IntegerField(choices=FORMATS)
+    valve_count = models.IntegerField()
 
 class Card(Device):
     rack = models.ForeignKey(Chassis, on_delete=models.CASCADE)
     slot = models.IntegerField()
 
+    # address template
+    # variables $RACK$, $SLOT$, $TYPE$, $POINT$
+    address_template = models.CharField(max_length=256, null=True, blank=True)
+
     class Meta:
         unique_together = ('rack', 'slot')
 
 class Point(models.Model):
+    DISCRETE_INPUT = "DI"
+    DISCRETE_OUTPUT = "DO"
+    ANALOG_INPUT = "AI"
+    ANALOG_OUTPUT = "AO"
+    RTD_INPUT = "RTD"
+    THERMOCOUPLE = "TC"
+    HIGH_SPEED_COUNT = "HSC"
+
+    TYPES = [
+        (DISCRETE_INPUT, "Discrete Input"),
+        (DISCRETE_OUTPUT, "Discrete Output"),
+        (ANALOG_INPUT, "Analog Input"),
+        (ANALOG_OUTPUT, "Analog Output"),
+        (RTD_INPUT, "RTD Input"),
+        (THERMOCOUPLE, "Thermocouple, Input"),
+        (HIGH_SPEED_COUNT, "High Speed Count Input")
+    ]
+
     card = models.ForeignKey(Card, on_delete=models.CASCADE)
-    tag = models.CharField(max_length=26)
     number = models.IntegerField()
+    type = models.CharField(max_length=6, choices=TYPES)
+    tag = models.CharField(max_length=26)
     description_1 = models.CharField(verbose_name="Desc 1", max_length=26, blank=True, null=True)
     description_2 = models.CharField(verbose_name="Desc 2", max_length=26, blank=True, null=True)
     description_3 = models.CharField(verbose_name="Desc 3", max_length=26, blank=True, null=True)
     description_4 = models.CharField(verbose_name="Desc 4", max_length=26, blank=True, null=True)
+    user_address = models.CharField(verbose_name="User Specified Address", max_length=82, blank=True, null=True)
+
+    def __io_type__(self):
+        inputs = [self.DISCRETE_INPUT, self.ANALOG_INPUT, self.RTD_INPUT,
+                    self.THERMOCOUPLE, self.HIGH_SPEED_COUNT]
+        outputs = [self.DISCRETE_OUTPUT, self.ANALOG_OUTPUT]
+
+        if self.type in inputs:
+            return "I"
+        elif self.type in outputs:
+            return "O"
+        else:
+            raise Exception("Unsupported Data Type: %s" % self.type)
+
+    @property
+    def address(self):
+
+
+        if self.user_address is None:
+            if self.card.address_template is None:
+                if self.type == self.DISCRETE_INPUT:
+                    _string = self.card.rack.name + ":I.Data[" + str(self.slot) + "]." + str(self.number) 
+                elif self.type == self.DISCRETE_OUTPUT:
+                    _string = self.card.rack.name + ":O.Data[" + str(self.slot) + "]." + str(self.number)
+                elif self.type == self.ANALOG_INPUT:
+                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
+                elif self.type == self.ANALOG_OUTPUT:
+                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":O.Ch" + str(self.number) + "Data"
+                elif self.type == self.RTD_INPUT:
+                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
+                elif self.type == self.THERMOCOUPLE:
+                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
+                elif self.type == self.HIGH_SPEED_COUNT:
+                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
+                else:
+                    pass
+            else:
+
+                # get the card address template if there is one, and upper case it
+                _address_template = self.card.address_template.upper()
+                _string = _address_template
+
+                if "$RACK$" in _address_template:
+                    _string = _string.replace("$RACK$", self.card.rack.name)
+                if "$TYPE$" in _address_template:
+                    _string = _string.replace("$TYPE$", self.__io_type__())
+                if "$SLOT$" in _address_template:
+                    _string = _string.replace("$SLOT$", str(self.card.slot))
+                if "$NUMBER$" in _address_template:
+                    _string = _string.replace("$NUMBER$", str(self.number))
+        else:
+            _string = self.user_address
+            
+        return _string
 
     def validate_unique(self, *args, **kwargs):
         super(Point, self).validate_unique(*args, **kwargs)
