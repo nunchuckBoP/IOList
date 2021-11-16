@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Customer, Plant, IOList, Chassis, ValveBank, Card, Point, BusDevice
+from .models import Customer, Plant, IOList, Chassis, ValveBank, Solenoid, Card, Point, BusDevice
 
 class CustomerAdmin(admin.ModelAdmin):
     list_display = ['name']
@@ -21,6 +21,10 @@ admin.site.register(Chassis, ChassisAdmin)
 class ValveBankAdmin(admin.ModelAdmin):
     list_display = ['name', 'io_list', 'address']
 admin.site.register(ValveBank, ValveBankAdmin)
+
+class SolenoidAdmin(admin.ModelAdmin):
+    list_display = ['number', 'bank', 'tag', 'address', 'description_1', 'description_2', 'description_3', 'description_4']
+admin.site.register(Solenoid, SolenoidAdmin)
 
 class CardAdmin(admin.ModelAdmin):
     list_display = ['slot', 'rack']

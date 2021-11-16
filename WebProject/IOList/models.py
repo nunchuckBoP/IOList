@@ -1,9 +1,38 @@
 from enum import unique
 from django.db import models
 from django.core.exceptions import ValidationError
+import math
 
+def validate_unique_tag(iolist, tag):
+    # returns true or false, if false, the user
+    # should raise a validation error
+
+    # first look in the points tabls
+    _points = Point.objects.filter(
+        card__rack__io_list=iolist,
+        tag=tag
+    )
+    if _points.exists():
+        return False
+
+    # second look in the bus device table
+    _bus_devices = BusDevice.objects.filter(
+        io_list=iolist, tag=tag
+    )
+    if _bus_devices.exists():
+        return False
+
+    # third look in the solenoid table
+    _solenoids = Solenoid.objects.filter(
+        bank__io_list=iolist, tag=tag
+    )
+    if _solenoids.exists():
+        return False
+
+    # if it got here, then it is validated
+    return True
+    
 # Create your models here.
-
 class Customer(models.Model):
     name = models.CharField(max_length=140, unique=True)
     def __str__(self):
@@ -60,6 +89,59 @@ class ValveBank(Chassis):
     ]
     data_format = models.IntegerField(choices=FORMATS)
     valve_count = models.IntegerField()
+    address_template = models.CharField(max_length=82, blank=True, null=True)
+
+class Solenoid(models.Model):
+    bank = models.ForeignKey(ValveBank, on_delete=models.CASCADE)
+    number = models.IntegerField()
+    tag = models.CharField(max_length=26)
+    description_1 = models.CharField(verbose_name="Desc 1", max_length=26, blank=True, null=True)
+    description_2 = models.CharField(verbose_name="Desc 2", max_length=26, blank=True, null=True)
+    description_3 = models.CharField(verbose_name="Desc 3", max_length=26, blank=True, null=True)
+    description_4 = models.CharField(verbose_name="Desc 4", max_length=26, blank=True, null=True)
+    user_address = models.CharField(verbose_name="User Specified Address", max_length=82, blank=True, null=True)
+
+    def __group__(self):
+        return math.floor(self.number / self.bank.data_format)
+
+    def __bit__(self):
+        return self.number % self.bank.data_format
+
+    @property
+    def spare_tag(self):
+        return self.bank.name + "SP" + str(self.number)
+
+    @property
+    def address(self):
+        if self.user_address is not None:
+            return self.user_address
+        else:
+            if self.bank.address_template is not None:
+                _address_string = self.bank.address_template.upper()
+                if "$RACK$" in self.bank.address_template:
+                    _address_string = _address_string.replace("$RACK$", self.bank.name)
+                if "$TYPE$" in self.bank.address_template:
+                    _address_string = _address_string.replace("$TYPE$", "O")
+                if "$GROUP$" in self.bank.address_template:
+                    _address_string = _address_string.replace("$GROUP$", str(self.__group__()))
+                if "$BIT$" in self.bank.address_template:
+                    _address_string = _address_string.replace("$BIT$", str(self.__bit__()))
+            else:
+                _address_string = self.bank.name + ":O.OutputArea[" + str(self.__group__()) + "]." + str(self.__bit__())
+        return _address_string.upper()
+
+    def validate_unique(self, *args, **kwargs):
+        super(Solenoid, self).validate_unique(*args, **kwargs)
+        if hasattr(self, "bank") and hasattr(self, "tag"):
+            _validated = validate_unique_tag(self.bank.io_list, self.tag)
+            if not _validated:
+                raise ValidationError(
+                        message = "Tag collision on io list.",
+                        code="unique_together"
+                    )
+
+    class Meta:
+        unique_together = ('bank', 'number')
 
 class Card(Device):
     rack = models.ForeignKey(Chassis, on_delete=models.CASCADE)
@@ -68,7 +150,6 @@ class Card(Device):
     # address template
     # variables $RACK$, $SLOT$, $TYPE$, $POINT$
     address_template = models.CharField(max_length=256, null=True, blank=True)
-
     class Meta:
         unique_together = ('rack', 'slot')
 
@@ -114,15 +195,27 @@ class Point(models.Model):
             raise Exception("Unsupported Data Type: %s" % self.type)
 
     @property
+    def spare_tag(self):
+        if self.card.slot < 10:
+            _slot_string = "S0" + str(self.card.slot)
+        else:
+            _slot_string = "S" + str(self.card.slot)
+
+        if self.number < 10:
+            _number_string = "P0" + str(self.number)
+        else:
+            _number_string = "P" + str(self.number)
+        
+        return self.card.rack.name + _slot_string + _number_string
+
+    @property
     def address(self):
-
-
         if self.user_address is None:
             if self.card.address_template is None:
                 if self.type == self.DISCRETE_INPUT:
-                    _string = self.card.rack.name + ":I.Data[" + str(self.slot) + "]." + str(self.number) 
+                    _string = self.card.rack.name + ":I.Data[" + str(self.card.slot) + "]." + str(self.number) 
                 elif self.type == self.DISCRETE_OUTPUT:
-                    _string = self.card.rack.name + ":O.Data[" + str(self.slot) + "]." + str(self.number)
+                    _string = self.card.rack.name + ":O.Data[" + str(self.card.slot) + "]." + str(self.number)
                 elif self.type == self.ANALOG_INPUT:
                     _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
                 elif self.type == self.ANALOG_OUTPUT:
@@ -156,21 +249,16 @@ class Point(models.Model):
 
     def validate_unique(self, *args, **kwargs):
         super(Point, self).validate_unique(*args, **kwargs)
-        
         if hasattr(self, 'card') and hasattr(self, 'tag'):
-            # checks if the same tag exists in the other tables
-            _t1 = self.__class__.objects.filter(
-                card__rack__io_list=self.card.rack.io_list, 
-                tag=self.tag
-            )
-            _t2 = BusDevice.objects.filter(
-                tag=self.tag
-            )
-            if _t1.exists() or _t2.exists():
+            _valid = validate_unique_tag(self.card.rack.io_list, self.tag)
+            if not _valid:
                 raise ValidationError(
-                    message = "Tag collision with either bus device or point table.",
-                    code="unique_together"
-                )   
+                     message = "Tag collision on io list.",
+                     code="unique_together"
+                )
+
+    class Meta:
+        unique_together = ('card', 'number')
 
 class BusDevice(Device):
     io_list = models.ForeignKey(IOList, on_delete=models.CASCADE)
@@ -184,14 +272,12 @@ class BusDevice(Device):
     def validate_unique(self, *args, **kwargs):
         super(BusDevice, self).validate_unique(*args, **kwargs)
         if hasattr(self, 'io_list') and hasattr(self, 'tag'):
-            _t1 = self.__class__.objects.filter(
-                io_list=self.io_list, tag=self.tag
-            )
-            _t2 = Point.objects.filter(
-                card__rack__io_list = self.io_list, tag=self.tag
-            )
-            if _t1.exists() or _t2.exists():
+            _valid = validate_unique_tag(self.io_list, self.tag)
+            if not _valid:
                 raise ValidationError(
-                    message = "Tag collision with either bus device or point table.",
-                    code="unique_together"
+                     message = "Tag collision on io list.",
+                     code="unique_together"
                 )
+    
+    class Meta:
+        unique_together = ('io_list', 'tag')
