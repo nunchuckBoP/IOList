@@ -82,10 +82,10 @@ class Chassis(Device):
 
 class ValveBank(Chassis):
     SINT_DATA = 4
-    DINT_DATA = 8
+    INT_DATA = 8
     FORMATS = [
         (SINT_DATA, "SINT DATA"),
-        (DINT_DATA, "DINT_DATA")
+        (INT_DATA, "INT DATA")
     ]
     data_format = models.IntegerField(choices=FORMATS)
     valve_count = models.IntegerField()
