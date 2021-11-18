@@ -1,0 +1,51 @@
+{# Load the tag library #}
+{% load bootstrap4 %}
+
+{# Load CSS #}
+{% bootstrap_css %}
+
+{# load static content #}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="https://getbootstrap.com/docs/4.0/assets/img/favicons/favicon.ico">
+
+    <title>{% block title %}{% endblock %}</title>
+
+    <!-- Custom styles for this template -->
+    <link href="{% static 'css/stickey-footer-navbar.css' %}" rel="stylesheet">
+
+  </head>
+
+  <body>
+
+    <header>      
+      {% include 'base/navbar.html' with site_name='CCS I/O List' %}
+    </header>
+
+    <div class='container-fluid'>
+      {% bootstrap_messages %}
+    </div>
+
+    <!-- Begin page content -->
+    <main role="main" class="container">
+      <h1 class="mt-5">{% block heading %}{% endblock %}</h1>
+      {% block content %}{% endblock %}
+    </main>
+
+    <footer class="footer">
+      <div class="container">
+        <span class="text-muted">Place sticky footer here.</span>
+      </div>
+    </footer>
+
+    {% bootstrap_javascript jquery='full' %}
+
+</body></html>

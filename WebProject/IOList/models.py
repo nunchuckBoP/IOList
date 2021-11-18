@@ -56,7 +56,8 @@ class Plant(models.Model):
 class IOList(models.Model):
     # one i.o list per controller
     plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
-    name = models.CharField(verbose_name="Controller / IO List Name", max_length=82)
+    name = models.CharField(verbose_name="IO List Name", max_length=82)
+    controller = models.CharField(verbose_name="Controller Name", max_length=256, blank=True, null=True)
 
     def __str__(self):
         return self.name
