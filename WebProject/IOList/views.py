@@ -1,127 +1,134 @@
 from typing import List
 from django.shortcuts import render
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from .models import model_fields
 from .models import BusDevice, Card, Chassis, Customer, IOList, Plant, Point, Solenoid, ValveBank
 
+PERMISSION_DENIED_MESSAGE = "You must log in to view this content"
+
 # Create your views here.
-class CustomerListView(ListView):
+class CustomerListView(LoginRequiredMixin, ListView):
+    model = Customer
+    login_url = None
+    permission_denied_message = PERMISSION_DENIED_MESSAGE
+    raise_exception = False
+
+class CustomerCreateView(LoginRequiredMixin, CreateView):
+    model = Customer
+    fields = model_fields['Customer']['list']
+
+class CustomerUpdateView(LoginRequiredMixin, UpdateView):
     model = Customer
 
-class CustomerCreateView(CreateView):
-    model = Customer
-
-class CustomerUpdateView(UpdateView):
-    model = Customer
-
-class CustomerDeleteView(DeleteView):
+class CustomerDeleteView(LoginRequiredMixin, DeleteView):
     model = Customer
 
 # location views
-
-class LocationListView(ListView):
+class LocationListView(LoginRequiredMixin, ListView):
     model = Plant
 
-class LocationCreateView(CreateView):
+class LocationCreateView(LoginRequiredMixin, CreateView):
     model = Plant
 
-class LocationUpdateView(UpdateView):
+class LocationUpdateView(LoginRequiredMixin, UpdateView):
     model = Plant
 
-class LocationDeleteView(DeleteView):
+class LocationDeleteView(LoginRequiredMixin, DeleteView):
     model = Plant
 
 # io list views
-class IOListListView(ListView):
+class IOListListView(LoginRequiredMixin, ListView):
     model = IOList
 
-class IOListCreateView(CreateView):
+class IOListCreateView(LoginRequiredMixin, CreateView):
     model = IOList
 
-class IOListUpdateView(UpdateView):
+class IOListUpdateView(LoginRequiredMixin, UpdateView):
     model = IOList
 
-class IOListDeleteView(DeleteView):
+class IOListDeleteView(LoginRequiredMixin, DeleteView):
     model = IOList
 
 # chassis views
-class ChassisListView(ListView):
+class ChassisListView(LoginRequiredMixin, ListView):
     model = Chassis
 
-class ChassisCreateView(CreateView):
+class ChassisCreateView(LoginRequiredMixin, CreateView):
     model = Chassis
 
-class ChassisUpdateView(UpdateView):
+class ChassisUpdateView(LoginRequiredMixin, UpdateView):
     model = Chassis
 
-class ChassisDeleteView(DeleteView):
+class ChassisDeleteView(LoginRequiredMixin, DeleteView):
     model = Chassis
 
 
 # card views
-class CardListView(ListView):
+class CardListView(LoginRequiredMixin, ListView):
     model = Card
 
-class CardCreateView(CreateView):
+class CardCreateView(LoginRequiredMixin, CreateView):
     model = Card
 
-class CardUpdateView(UpdateView):
+class CardUpdateView(LoginRequiredMixin, UpdateView):
     model = Card
 
-class CardDeleteView(DeleteView):
+class CardDeleteView(LoginRequiredMixin, DeleteView):
     model = Card
 
 
 # point views
-class PointListView(ListView):
+class PointListView(LoginRequiredMixin, ListView):
     model = Point
 
-class PointCreateView(CreateView):
+class PointCreateView(LoginRequiredMixin, CreateView):
     model = Point
 
-class PointUpdateView(UpdateView):
+class PointUpdateView(LoginRequiredMixin, UpdateView):
     model = Point
 
-class PointDeleteView(DeleteView):
+class PointDeleteView(LoginRequiredMixin, DeleteView):
     model = Point
 
 
 # bank views
-class BankListView(ListView):
+class BankListView(LoginRequiredMixin, ListView):
     model = ValveBank
 
-class BankCreateView(CreateView):
+class BankCreateView(LoginRequiredMixin, CreateView):
     model = ValveBank
 
-class BankUpdateView(UpdateView):
+class BankUpdateView(LoginRequiredMixin, UpdateView):
     model = ValveBank
 
-class BankDeleteView(DeleteView):
+class BankDeleteView(LoginRequiredMixin, DeleteView):
     model = ValveBank
 
 
 # solenoid views
-class SolenoidListView(ListView):
+class SolenoidListView(LoginRequiredMixin, ListView):
     model = Solenoid
 
-class SolenoidCreateView(CreateView):
+class SolenoidCreateView(LoginRequiredMixin, CreateView):
     model = Solenoid
 
-class SolenoidUpdateView(UpdateView):
+class SolenoidUpdateView(LoginRequiredMixin, UpdateView):
     model = Solenoid
 
-class SolenoidDeleteView(DeleteView):
+class SolenoidDeleteView(LoginRequiredMixin, DeleteView):
     model = Solenoid
 
 
 # bus device views
-class BusDeviceListView(ListView):
+class BusDeviceListView(LoginRequiredMixin, ListView):
     model = BusDevice
 
-class BusDeviceCreateView(CreateView):
+class BusDeviceCreateView(LoginRequiredMixin, CreateView):
     model = BusDevice
 
-class BusDeviceUpdateView(UpdateView):
+class BusDeviceUpdateView(LoginRequiredMixin, UpdateView):
     model = BusDevice
 
-class BusDeviceDeleteView(DeleteView):
+class BusDeviceDeleteView(LoginRequiredMixin, DeleteView):
     model = BusDevice

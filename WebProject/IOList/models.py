@@ -1,7 +1,16 @@
 from enum import unique
 from django.db import models
 from django.core.exceptions import ValidationError
+from django.contrib.auth.models import User
 import math
+
+model_fields = {
+    'Customer':
+        {
+            'list':['name'],
+            'form':['name'],
+        }
+}
 
 def validate_unique_tag(iolist, tag):
     # returns true or false, if false, the user
@@ -58,9 +67,16 @@ class IOList(models.Model):
     plant = models.ForeignKey(Plant, on_delete=models.CASCADE)
     name = models.CharField(verbose_name="IO List Name", max_length=82)
     controller = models.CharField(verbose_name="Controller Name", max_length=256, blank=True, null=True)
+    created = models.DateTimeField(auto_now_add=True, blank=True)
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='IOList_Created_By')
+    modified = models.DateTimeField(blank=False, null=True)
+    modified_by = models.ForeignKey(User, on_delete=models.SET_NULL, blank=True, null=True, related_name='IOList_Modified_By')
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = ('plant', 'name')
 
 class Device(models.Model):
     make = models.CharField(verbose_name="Make / Manufacturer", max_length=256)
