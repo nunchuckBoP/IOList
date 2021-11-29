@@ -1,5 +1,6 @@
 from typing import List
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from .models import model_fields
@@ -17,25 +18,37 @@ class CustomerListView(LoginRequiredMixin, ListView):
 class CustomerCreateView(LoginRequiredMixin, CreateView):
     model = Customer
     fields = model_fields['Customer']['list']
+    success_url = reverse_lazy('customer-list')
 
 class CustomerUpdateView(LoginRequiredMixin, UpdateView):
     model = Customer
+    fields = model_fields['Customer']['form']
+    success_url = reverse_lazy('customer-list')
 
 class CustomerDeleteView(LoginRequiredMixin, DeleteView):
     model = Customer
+    fields = model_fields['Customer']['form']
+    success_url = reverse_lazy('customer-list')
 
 # location views
 class LocationListView(LoginRequiredMixin, ListView):
     model = Plant
+    fields = model_fields['Location']['list']
 
 class LocationCreateView(LoginRequiredMixin, CreateView):
     model = Plant
+    fields = model_fields['Location']['form']
+    success_url = reverse_lazy('location-list')
 
 class LocationUpdateView(LoginRequiredMixin, UpdateView):
     model = Plant
+    fields = model_fields['Location']['form']
+    success_url = reverse_lazy('location-list')
 
 class LocationDeleteView(LoginRequiredMixin, DeleteView):
     model = Plant
+    fields = model_fields['Location']['form']
+    success_url = reverse_lazy('location-list')
 
 # io list views
 class IOListListView(LoginRequiredMixin, ListView):

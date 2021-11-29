@@ -40,6 +40,12 @@ urlpatterns = [
     path('location/update/<pk>/', LocationUpdateView.as_view(), name='location-update'),
     path('location/delete/<pk>/', LocationDeleteView.as_view(), name='location-delete'),
 
+    # customer location views
+    path('<int:customer_id>/location/list/', LocationListView.as_view(), name='customer-location-list'),
+    path('<int:customer_id>/location/create/', LocationCreateView.as_view(), name='customer-location-create'),
+    path('<int:customer_id>/location/update/<pk>/', LocationUpdateView.as_view(), name='customer-location-update'),
+    path('<int:customer_id>/location/delete/<pk>/', LocationDeleteView.as_view(), name='customer-location-delete'),
+
     # io list views
     path('iolist/list/', IOListListView.as_view(), name='iolist-list'),
     path('iolist/create/', IOListCreateView.as_view(), name='iolist-create'),

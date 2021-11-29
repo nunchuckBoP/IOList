@@ -9,7 +9,12 @@ model_fields = {
         {
             'list':['name'],
             'form':['name'],
-        }
+        },
+    'Location':
+        {
+            'list':['customer', 'short_name', 'street', 'line2', 'city', 'state', 'zip_code'],
+            'form':['customer', 'short_name', 'street', 'line2', 'city', 'state', 'zip_code'],
+        },
 }
 
 def validate_unique_tag(iolist, tag):
@@ -46,6 +51,10 @@ class Customer(models.Model):
     name = models.CharField(max_length=140, unique=True)
     def __str__(self):
         return self.name
+
+    @property
+    def locations(self):
+        return Plant.objects.filter(customer=self).count()
 
 class Plant(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE)
