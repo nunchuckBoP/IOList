@@ -15,6 +15,11 @@ model_fields = {
             'list':['customer', 'short_name', 'street', 'line2', 'city', 'state', 'zip_code'],
             'form':['customer', 'short_name', 'street', 'line2', 'city', 'state', 'zip_code'],
         },
+    'IOList':
+        {
+            'list':['plant', 'name', 'controller', 'created', 'created_by', 'modified', 'modified_by'],
+            'form':['plant', 'name', 'controller'],
+        }
 }
 
 def validate_unique_tag(iolist, tag):

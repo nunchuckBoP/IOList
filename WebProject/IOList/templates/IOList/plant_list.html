@@ -5,26 +5,31 @@
 {% block heading %}Location List{% endblock %}
 
 {% block content %}
+    {% if customer %}
+        <h3>Customer: {{ customer.name }}</h3>
+    {% endif %}
     {% if object_list %}
         <table class='table'>
             <tr>
-                <th>Customer</th>
+                {% if not customer %}<th>Customer</th>{% endif %}
                 <th>Location</th>
                 <th>Street</th>
                 <th>Line 2</th>
                 <th>City</th>
                 <th>State</th>
                 <th>Zip Code</th>
+                <th></th>
             </tr>
             {% for i in object_list %}
                 <tr>
-                    <td>{{ i.customer }}</td>
-                    <td>{{ i.short_name }}</td>
+                    {% if not customer %}<td>{{ i.customer }}</td>{% endif %}
+                    <td><a href="{% url 'location-iolist-list' location_id=i.pk %}">{{ i.short_name }}</a></td>
                     <td>{{ i.street }}</td>
                     <td>{{ i.line2 }}</td>
                     <td>{{ i.city }}</td>
                     <td>{{ i.state }}</td>
                     <td>{{ i.zip_code }}</td>
+                    <td><a href="{% url 'location-update' pk=i.pk %}">Edit</a></td>
                 </tr>
             {% endfor %}
         </table>

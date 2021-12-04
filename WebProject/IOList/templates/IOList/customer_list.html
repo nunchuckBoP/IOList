@@ -4,19 +4,19 @@
 
 {% block heading %}Customer List{% endblock %}
 
-{% include "io_list_navbar.html" %}
-
 {% block content %}
     {% if object_list %}
         <table class='table'>
             <tr>
                 <th>Customer</th>
                 <th>Locations</th>
+                <th></th>
             </tr>
             {% for i in object_list %}
                 <tr>
-                    <td>{{ i.name }}</td>
+                    <td><a href="{% url 'customer-location-list' customer_id=i.pk %}">{{ i.name }}</a></td>
                     <td>{{ i.locations }}</td>
+                    <td><a href="{% url 'customer-update' pk=i.pk %}">Edit</a></td>
                 </tr>
             {% endfor %}
         </table>

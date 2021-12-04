@@ -43,14 +43,16 @@ urlpatterns = [
     # customer location views
     path('<int:customer_id>/location/list/', LocationListView.as_view(), name='customer-location-list'),
     path('<int:customer_id>/location/create/', LocationCreateView.as_view(), name='customer-location-create'),
-    path('<int:customer_id>/location/update/<pk>/', LocationUpdateView.as_view(), name='customer-location-update'),
-    path('<int:customer_id>/location/delete/<pk>/', LocationDeleteView.as_view(), name='customer-location-delete'),
 
     # io list views
     path('iolist/list/', IOListListView.as_view(), name='iolist-list'),
     path('iolist/create/', IOListCreateView.as_view(), name='iolist-create'),
     path('iolist/update/<pk>/', IOListUpdateView.as_view(), name='iolist-update'),
     path('iolist/delete/<pk>/', IOListDeleteView.as_view(), name='iolist-delete'),
+
+    # location io list views
+    path('<int:location_id>/iolist/list/', IOListListView.as_view(), name='location-iolist-list'),
+    path('<int:location_id>/iolist/create/', IOListCreateView.as_view(), name='location-iolist-create'),
 
     # chassis views
     path('chassis/list/', ChassisListView.as_view(), name='chassis-list'),

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}IO Lists{% endblock %}
+
+{% block heading %}IO Lists{% endblock %}
+
+{% block content %}
+    {% if location %}
+        <h3>Location: {{ location }}</h3>
+    {% endif %}
+    {% if object_list %}
+        <table class='table'>
+            <tr>
+                {% if not location %}<th>Location</th>{% endif %}
+                <th>Name</th>
+                <th>Controller</th>
+                <th>Created</th>
+                <th>Created By</th>
+                <th>Modified</th>
+                <th>Modified By</th>
+                <th></th>
+            </tr>
+            {% for i in object_list %}
+                <tr>
+                    {% if not location %}<td>{{ i.plant }}</td>{% endif %}
+                    <td>{{ i.name }}</td>
+                    <td>{{ i.controller }}</td>
+                    <td>{{ i.created }}</td>
+                    <td>{{ i.created_by }}</td>
+                    <td>{{ i.modified }}</td>
+                    <td>{{ i.modified_by }}</td>
+                    <td><a href="{% url 'iolist-update' pk=i.pk %}">Edit</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <p>No IO Lists</p>
+    {% endif %}
+{% endblock %}
