@@ -8,6 +8,7 @@ from django.views.generic import CreateView, ListView, UpdateView, DeleteView
 from .models import model_fields
 from .models import BusDevice, Card, Chassis, Customer, IOList, Plant, Point, Solenoid, ValveBank
 import time
+from .mixins import NextUrlMixin
 
 PERMISSION_DENIED_MESSAGE = "You must log in to view this content"
 
@@ -23,12 +24,12 @@ class CustomerCreateView(LoginRequiredMixin, CreateView):
     fields = model_fields['Customer']['list']
     success_url = reverse_lazy('customer-list')
 
-class CustomerUpdateView(LoginRequiredMixin, UpdateView):
+class CustomerUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Customer
     fields = model_fields['Customer']['form']
     success_url = reverse_lazy('customer-list')
 
-class CustomerDeleteView(LoginRequiredMixin, DeleteView):
+class CustomerDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Customer
     fields = model_fields['Customer']['form']
     success_url = reverse_lazy('customer-list')
@@ -49,7 +50,7 @@ class LocationListView(LoginRequiredMixin, ListView):
 
         return context
 
-class LocationCreateView(LoginRequiredMixin, CreateView):
+class LocationCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Plant
     fields = model_fields['Location']['form']
     success_url = reverse_lazy('location-list')
@@ -62,18 +63,18 @@ class LocationCreateView(LoginRequiredMixin, CreateView):
                 'customer':customer
             }
 
-class LocationUpdateView(LoginRequiredMixin, UpdateView):
+class LocationUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Plant
     fields = model_fields['Location']['form']
     success_url = reverse_lazy('location-list')
 
-class LocationDeleteView(LoginRequiredMixin, DeleteView):
+class LocationDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Plant
     fields = model_fields['Location']['form']
     success_url = reverse_lazy('location-list')
 
 # io list views
-class IOListListView(LoginRequiredMixin, ListView):
+class IOListListView(LoginRequiredMixin, NextUrlMixin, ListView):
     model = IOList
     fields = model_fields['IOList']['list']
 
@@ -87,7 +88,7 @@ class IOListListView(LoginRequiredMixin, ListView):
             context['location'] = location
         return context
 
-class IOListCreateView(LoginRequiredMixin, CreateView):
+class IOListCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = IOList
     fields = model_fields['IOList']['form']
     success_url = reverse_lazy('iolist-list')
@@ -108,25 +109,25 @@ class IOListCreateView(LoginRequiredMixin, CreateView):
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
-class IOListUpdateView(LoginRequiredMixin, UpdateView):
+class IOListUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = IOList
     fields = model_fields['IOList']['form']
     success_url = reverse_lazy('iolist-list')
 
-class IOListDeleteView(LoginRequiredMixin, DeleteView):
+class IOListDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = IOList
 
 # chassis views
 class ChassisListView(LoginRequiredMixin, ListView):
     model = Chassis
 
-class ChassisCreateView(LoginRequiredMixin, CreateView):
+class ChassisCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Chassis
 
-class ChassisUpdateView(LoginRequiredMixin, UpdateView):
+class ChassisUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Chassis
 
-class ChassisDeleteView(LoginRequiredMixin, DeleteView):
+class ChassisDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Chassis
 
 
@@ -134,13 +135,13 @@ class ChassisDeleteView(LoginRequiredMixin, DeleteView):
 class CardListView(LoginRequiredMixin, ListView):
     model = Card
 
-class CardCreateView(LoginRequiredMixin, CreateView):
+class CardCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Card
 
-class CardUpdateView(LoginRequiredMixin, UpdateView):
+class CardUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Card
 
-class CardDeleteView(LoginRequiredMixin, DeleteView):
+class CardDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Card
 
 
@@ -148,13 +149,13 @@ class CardDeleteView(LoginRequiredMixin, DeleteView):
 class PointListView(LoginRequiredMixin, ListView):
     model = Point
 
-class PointCreateView(LoginRequiredMixin, CreateView):
+class PointCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Point
 
-class PointUpdateView(LoginRequiredMixin, UpdateView):
+class PointUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Point
 
-class PointDeleteView(LoginRequiredMixin, DeleteView):
+class PointDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Point
 
 
@@ -162,13 +163,13 @@ class PointDeleteView(LoginRequiredMixin, DeleteView):
 class BankListView(LoginRequiredMixin, ListView):
     model = ValveBank
 
-class BankCreateView(LoginRequiredMixin, CreateView):
+class BankCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = ValveBank
 
-class BankUpdateView(LoginRequiredMixin, UpdateView):
+class BankUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = ValveBank
 
-class BankDeleteView(LoginRequiredMixin, DeleteView):
+class BankDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = ValveBank
 
 
@@ -176,13 +177,13 @@ class BankDeleteView(LoginRequiredMixin, DeleteView):
 class SolenoidListView(LoginRequiredMixin, ListView):
     model = Solenoid
 
-class SolenoidCreateView(LoginRequiredMixin, CreateView):
+class SolenoidCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Solenoid
 
-class SolenoidUpdateView(LoginRequiredMixin, UpdateView):
+class SolenoidUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Solenoid
 
-class SolenoidDeleteView(LoginRequiredMixin, DeleteView):
+class SolenoidDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Solenoid
 
 
@@ -190,11 +191,11 @@ class SolenoidDeleteView(LoginRequiredMixin, DeleteView):
 class BusDeviceListView(LoginRequiredMixin, ListView):
     model = BusDevice
 
-class BusDeviceCreateView(LoginRequiredMixin, CreateView):
+class BusDeviceCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = BusDevice
 
-class BusDeviceUpdateView(LoginRequiredMixin, UpdateView):
+class BusDeviceUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = BusDevice
 
-class BusDeviceDeleteView(LoginRequiredMixin, DeleteView):
+class BusDeviceDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = BusDevice

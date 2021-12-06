@@ -29,10 +29,15 @@
                     <td>{{ i.city }}</td>
                     <td>{{ i.state }}</td>
                     <td>{{ i.zip_code }}</td>
-                    <td><a href="{% url 'location-update' pk=i.pk %}">Edit</a></td>
+                    <td><a href="{% url 'location-update' pk=i.pk %}?next={{ request.path }}">Edit</a></td>
                 </tr>
             {% endfor %}
         </table>
+        {% if customer %}
+            <p><a href="{% url 'customer-location-create' customer_id=customer.pk %}?next={{ request.path }}">Create new plant</a></p>
+        {% else %}
+            <p><a href="{% url 'location-create' %}?next={{ request.path }}">Create new plant</a></p>
+        {% endif %}
     {% else %}
         <p>No locations</p>
     {% endif %}

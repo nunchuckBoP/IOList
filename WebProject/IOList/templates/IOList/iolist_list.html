@@ -29,10 +29,11 @@
                     <td>{{ i.created_by }}</td>
                     <td>{{ i.modified }}</td>
                     <td>{{ i.modified_by }}</td>
-                    <td><a href="{% url 'iolist-update' pk=i.pk %}">Edit</a></td>
+                    <td><a href="{% url 'iolist-update' pk=i.pk %}?next={{ request.path }}">Edit</a></td>
                 </tr>
             {% endfor %}
         </table>
+        <p><a href="{% url 'plant-create' %}?next={{ request.path }}">Create new plant</a></p>
     {% else %}
         <p>No IO Lists</p>
     {% endif %}
