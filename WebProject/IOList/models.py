@@ -19,6 +19,11 @@ model_fields = {
         {
             'list':['plant', 'name', 'controller', 'created', 'created_by', 'modified', 'modified_by'],
             'form':['plant', 'name', 'controller'],
+        },
+    'Chassis':
+        {
+            'list':['make', 'part_number', 'description', 'name', 'address'],
+            'form':['make', 'part_number', 'description', 'name', 'address'],
         }
 }
 

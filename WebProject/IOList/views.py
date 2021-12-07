@@ -98,7 +98,7 @@ class IOListCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
             location_id = self.kwargs['location_id']
             location = get_object_or_404(Plant, pk=location_id)
             return {
-                'location':location
+                'plant':location
             }
 
     def form_valid(self, form):
@@ -120,16 +120,38 @@ class IOListDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
 # chassis views
 class ChassisListView(LoginRequiredMixin, ListView):
     model = Chassis
+    fields = model_fields['Chassis']['list']
+
+    def get_context_data(self, **kwargs):
+        context = super(ChassisListView, self).get_context_data(**kwargs)
+        context['fields'] = self.fields
+        if 'iolist_id' in self.kwargs:
+            iolist_id = self.kwargs['iolist_id']
+            iolist = get_object_or_404(IOList, pk=iolist_id)
+            context['object_list'] = Chassis.objects.filter(io_list=iolist)
+            context['iolist'] = iolist
+        return context
 
 class ChassisCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Chassis
+    fields = model_fields['Chassis']['form']
+    success_url = reverse_lazy('chassis-list')
+
+    def get_initial(self):
+        if 'iolist' in self.kwargs:
+            iolist_id = self.kwargs['iolist']
+            iolist = get_object_or_404(IOList, pk=iolist_id)
+            return {
+                'iolist':iolist
+            }
 
 class ChassisUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Chassis
+    fields = model_fields['Chassis']['form']
+    success_url = reverse_lazy('chassis-list')
 
 class ChassisDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Chassis
-
 
 # card views
 class CardListView(LoginRequiredMixin, ListView):

@@ -60,11 +60,19 @@ urlpatterns = [
     path('chassis/update/<pk>/', ChassisUpdateView.as_view(), name='chassis-update'),
     path('chassis/delete/<pk>/', ChassisDeleteView.as_view(), name='chassis-delete'),
 
+    # io list chassis views
+    path('<int:iolist_id>/chassis/list/', ChassisListView.as_view(), name='iolist-chassis-list'),
+    path('<int:iolist_id>/chassis/create/', ChassisCreateView.as_view(), name='iolist-chassis-create'),
+
     # card views
     path('card/list/', CardListView.as_view(), name='card-list'),
     path('card/create/', CardCreateView.as_view(), name='card-create'),
     path('card/update/<pk>/', CardUpdateView.as_view(), name='card-update'),
     path('card/delete/<pk>/', CardDeleteView.as_view(), name='card-delete'),
+
+    # chassis card views
+    path('<int:chassis>/card/list/', CardListView.as_view(), name='chassis-card-list'),
+    path('<int:chassis>/card/create/', CardCreateView.as_view(), name='chassis-card-create'),
 
     # point views
     path('point/list/', PointListView.as_view(), name='point-list'),

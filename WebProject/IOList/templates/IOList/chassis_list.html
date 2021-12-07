@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Chassis{% endblock %}
+
+{% block heading %}Chassis{% endblock %}
+
+{% block content %}
+    {% if iolist %}
+        <h3>IO List: {{ iolist }}</h3>
+    {% endif %}
+    {% if object_list %}
+        <table class='table'>
+            <tr>
+                {% if not iolist %}<th>IO List</th>{% endif %}
+                <th>Name</th>
+                <th>Make</th>
+                <th>Part Number</th>
+                <th>Description</th>
+                <th>Address</th>
+                <th></th>
+            </tr>
+            {% for i in object_list %}
+                <tr>
+                    {% if not iolist %}<td>{{ i.io_list }}</td>{% endif %}
+                    <td>{{ i.name }}</td>
+                    <td>{{ i.make }}</td>
+                    <td>{{ i.part_number }}</td>
+                    <td>{{ i.description }}</td>
+                    <td>{{ i.address }}</td>
+                    <td><a href="{% url 'chassis-update' pk=i.pk %}?next={{ request.path }}">Edit</a></td>
+                </tr>
+            {% endfor %}
+        </table>
+        {% if location %}
+            <p><a href="{% url 'iolist-chassis-create' iolist=iolist.pk %}?next={{ request.path }}">Create new chassis</a></p>
+        {% else %}
+            <p><a href="{% url 'chassis-create' %}?next={{ request.path }}">Create new chassis</a></p>
+        {% endif %}
+    {% else %}
+        <p>No Chassis</p>
+    {% endif %}
+{% endblock %}
