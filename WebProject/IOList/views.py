@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from django.views.generic.base import TemplateView
 from .models import model_fields
 from .models import BusDevice, Card, Chassis, Customer, IOList, Plant, Point, Solenoid, ValveBank
 import time
@@ -105,7 +106,6 @@ class IOListCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
         self.object = form.save()
         self.object.modified_by = self.request.user
         self.object.modified = time.localtime()
-        print(self.object)
         self.object.save()
         return HttpResponseRedirect(self.get_success_url())
 
@@ -116,6 +116,26 @@ class IOListUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
 
 class IOListDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = IOList
+
+class FullIOListView(LoginRequiredMixin, NextUrlMixin, TemplateView):
+    model = Chassis
+    template_name = 'full_iolist.html'
+    
+    def get_context_data(self, **kwargs):
+        context = {}
+        if 'iolist_id' in self.kwargs:
+            iolist_id = self.kwargs['iolist_id']
+            iolist = get_object_or_404(IOList, pk=iolist_id)
+
+            chassis = Chassis.objects.filter(io_list=iolist)
+            valve_banks = ValveBank.objects.filter(io_list=iolist)
+            bus_devices = BusDevice.objects.filter(io_list=iolist)
+
+            context['chassis'] = chassis
+            context['valve_banks'] = valve_banks
+            context['bus_devices'] = bus_devices
+            
+        return context
 
 # chassis views
 class ChassisListView(LoginRequiredMixin, ListView):
