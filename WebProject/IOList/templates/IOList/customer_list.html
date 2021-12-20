@@ -23,5 +23,6 @@
         <p><a href="{% url 'customer-create' %}?next={{ request.path }}">Create new customer</a></p>
     {% else %}
         <p>No customers</p>
+        <p><a href="{% url 'customer-create' %}?next={{ request.path }}">Create new customer</a></p>
     {% endif %}
 {% endblock %}

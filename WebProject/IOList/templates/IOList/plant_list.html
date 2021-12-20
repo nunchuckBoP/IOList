@@ -39,6 +39,11 @@
             <p><a href="{% url 'location-create' %}?next={{ request.path }}">Create new plant</a></p>
         {% endif %}
     {% else %}
+        {% if customer %}
+            <p><a href="{% url 'customer-location-create' customer_id=customer.pk %}?next={{ request.path }}">Create new plant</a></p>
+        {% else %}
+            <p><a href="{% url 'location-create' %}?next={{ request.path }}">Create new plant</a></p>
+        {% endif %}
         <p>No locations</p>
     {% endif %}
 {% endblock %}

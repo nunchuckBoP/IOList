@@ -27,7 +27,7 @@ class SolenoidAdmin(admin.ModelAdmin):
 admin.site.register(Solenoid, SolenoidAdmin)
 
 class CardAdmin(admin.ModelAdmin):
-    list_display = ['slot', 'rack']
+    list_display = ['slot', 'chassis']
 admin.site.register(Card, CardAdmin)
 
 class PointAdmin(admin.ModelAdmin):

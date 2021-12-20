@@ -33,7 +33,7 @@ def validate_unique_tag(iolist, tag):
 
     # first look in the points tabls
     _points = Point.objects.filter(
-        card__rack__io_list=iolist,
+        card__chassis__io_list=iolist,
         tag=tag
     )
     if _points.exists():
@@ -104,6 +104,9 @@ class Device(models.Model):
 
     def __str__(self):
         return self.part_number
+
+    class Meta:
+        abstract = True
 
 class Chassis(Device):
     io_list = models.ForeignKey(IOList, on_delete=models.CASCADE)
@@ -180,14 +183,14 @@ class Solenoid(models.Model):
         unique_together = ('bank', 'number')
 
 class Card(Device):
-    rack = models.ForeignKey(Chassis, on_delete=models.CASCADE)
+    chassis = models.ForeignKey(Chassis, on_delete=models.CASCADE)
     slot = models.IntegerField()
 
     # address template
     # variables $RACK$, $SLOT$, $TYPE$, $POINT$
     address_template = models.CharField(max_length=256, null=True, blank=True)
     class Meta:
-        unique_together = ('rack', 'slot')
+        unique_together = ('chassis', 'slot')
 
 class Point(models.Model):
     DISCRETE_INPUT = "DI"
@@ -242,26 +245,26 @@ class Point(models.Model):
         else:
             _number_string = "P" + str(self.number)
         
-        return self.card.rack.name + _slot_string + _number_string
+        return self.card.chassis.name + _slot_string + _number_string
 
     @property
     def address(self):
         if self.user_address is None:
             if self.card.address_template is None:
                 if self.type == self.DISCRETE_INPUT:
-                    _string = self.card.rack.name + ":I.Data[" + str(self.card.slot) + "]." + str(self.number) 
+                    _string = self.card.chassis.name + ":I.Data[" + str(self.card.slot) + "]." + str(self.number) 
                 elif self.type == self.DISCRETE_OUTPUT:
-                    _string = self.card.rack.name + ":O.Data[" + str(self.card.slot) + "]." + str(self.number)
+                    _string = self.card.chassis.name + ":O.Data[" + str(self.card.slot) + "]." + str(self.number)
                 elif self.type == self.ANALOG_INPUT:
-                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
+                    _string = self.card.chassis.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
                 elif self.type == self.ANALOG_OUTPUT:
-                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":O.Ch" + str(self.number) + "Data"
+                    _string = self.card.chassis.name + ":" + str(self.card.slot) + ":O.Ch" + str(self.number) + "Data"
                 elif self.type == self.RTD_INPUT:
-                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
+                    _string = self.card.chassis.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
                 elif self.type == self.THERMOCOUPLE:
-                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
+                    _string = self.card.chassis.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
                 elif self.type == self.HIGH_SPEED_COUNT:
-                    _string = self.card.rack.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
+                    _string = self.card.chassis.name + ":" + str(self.card.slot) + ":I.Ch" + str(self.number) + "Data"
                 else:
                     pass
             else:
@@ -286,7 +289,7 @@ class Point(models.Model):
     def validate_unique(self, *args, **kwargs):
         super(Point, self).validate_unique(*args, **kwargs)
         if hasattr(self, 'card') and hasattr(self, 'tag'):
-            _valid = validate_unique_tag(self.card.rack.io_list, self.tag)
+            _valid = validate_unique_tag(self.card.chassis.io_list, self.tag)
             if not _valid:
                 raise ValidationError(
                      message = "Tag collision on io list.",

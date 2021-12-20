@@ -22,7 +22,7 @@
             {% for i in object_list %}
                 <tr>
                     {% if not iolist %}<td>{{ i.io_list }}</td>{% endif %}
-                    <td>{{ i.name }}</td>
+                    <td><a href="#">{{ i.name }}</a></td>
                     <td>{{ i.make }}</td>
                     <td>{{ i.part_number }}</td>
                     <td>{{ i.description }}</td>

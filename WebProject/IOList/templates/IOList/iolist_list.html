@@ -23,7 +23,7 @@
             {% for i in object_list %}
                 <tr>
                     {% if not location %}<td>{{ i.plant }}</td>{% endif %}
-                    <td><a href="{% url 'iolist-chassis-list' iolist=i.pk %}?next={{ request.path }}">{{ i.name }}</a></td>
+                    <td><a href="{% url 'fulliolist' iolist_id=i.pk %}?next={{ request.path }}">{{ i.name }}</a></td>
                     <td>{{ i.controller }}</td>
                     <td>{{ i.created }}</td>
                     <td>{{ i.created_by }}</td>
@@ -40,5 +40,10 @@
         {% endif %}
     {% else %}
         <p>No IO Lists</p>
+        {% if location %}
+            <p><a href="{% url 'location-iolist-create' location_id=location.pk %}?next={{ request.path }}">Create new io list</a></p>
+        {% else %}
+            <p><a href="{% url 'iolist-create' %}?next={{ request.path }}">Create new io list</a></p>
+        {% endif %}
     {% endif %}
 {% endblock %}

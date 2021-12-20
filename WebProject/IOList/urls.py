@@ -24,6 +24,7 @@ from .views import PointListView, PointCreateView, PointUpdateView, PointDeleteV
 from .views import BankListView, BankCreateView, BankUpdateView, BankDeleteView
 from .views import SolenoidListView, SolenoidCreateView, SolenoidUpdateView, SolenoidDeleteView
 from .views import BusDeviceListView, BusDeviceCreateView, BusDeviceUpdateView, BusDeviceDeleteView
+from .views import FullIOListView
 
 urlpatterns = [
 #    path('admin/', admin.site.urls),
@@ -63,6 +64,9 @@ urlpatterns = [
     # io list chassis views
     path('<int:iolist_id>/chassis/list/', ChassisListView.as_view(), name='iolist-chassis-list'),
     path('<int:iolist_id>/chassis/create/', ChassisCreateView.as_view(), name='iolist-chassis-create'),
+
+    # full io list
+    path('<int:iolist_id>/fulliolist/', FullIOListView.as_view(), name='fulliolist'),
 
     # card views
     path('card/list/', CardListView.as_view(), name='card-list'),

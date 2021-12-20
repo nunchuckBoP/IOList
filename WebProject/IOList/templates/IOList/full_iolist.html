@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Full IO List{% endblock %}
+
+{% block heading %}IO List{% endblock %}
+
+{% block content %}
+    {% if iolist %}
+        <table class='table'>
+            <tr>
+                <th>Customer</th>
+                <td>{{ iolist.plant.customer }}</td>
+            </tr>
+            <tr>
+                <th>Location</th>
+                <td>{{ iolist.plant }}</td>
+            </tr>
+            <tr>
+                <th>IO List</th>
+                <td>{{ iolist }}</td>
+            </tr>
+        </table>
+    {% endif %}
+
+    <div class='container'>
+        <span style="float: left;"><h3>Chassis</h3></span><span style="float: right;"></span>
+    </div>
+    {% if chassis %}
+        <div id="scoped-content">
+            <style type="text/css" scoped>
+                table, th, td {
+                    vertical-align: text-bottom;
+                }
+            </style>
+            <table class='table'>
+                <tr> 
+                    <th>Name</th>
+                    <th colspan="4">Description</th>
+                    <th>Make</th>
+                    <th>Part Number</th>
+                    <th>Address</th>
+                    <td><a class="btn btn-primary" href="#">Add+</a></td>
+                </tr>
+                {% for c in chassis %}
+                    <tr style="background-color: lightsalmon;">
+                        <td>{{ c.name }}</td>
+                        <td colspan="4">{{ c.description }}</td>
+                        <td>{{ c.make }}</td>
+                        <td>{{ c.part_number }}</td>
+                        <td>{{ c.address }}</td>
+                        <td><a class="btn btn-primary" href="#">Edit</a></td>
+                    </tr>
+                    {% if c.cards %}
+                        {% for card in c.cards %}
+                            <tr>
+                                <td>card.slot</td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" style="padding-left: 30px;"><a class="btn btn-primary" href="#">Add Card</a></td>
+                        </tr>
+                    {% endif %}
+                {% endfor %}
+            </table>
+        </div>
+        
+    {% else %}
+        <p>No Chassis</p>
+    {% endif %}
+
+    <h3>Valve Banks</h3>
+    {% if valve_banks %}
+        {% for v in valve_banks %}
+
+        {% endfor %}
+    {% else %}
+        <p>No Valve Banks</p>
+    {% endif %}
+
+
+    <h3>Drives / Bus Devices</h3>
+    {% if bus_devices %}
+        {% for b in bus_devices %}
+
+        {% endfor %}
+    {% else %}
+        <p>no ethernet drives/bus devices</p>
+    {% endif %}
+{% endblock %}
