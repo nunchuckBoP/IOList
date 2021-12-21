@@ -13,7 +13,15 @@ from .mixins import NextUrlMixin
 
 PERMISSION_DENIED_MESSAGE = "You must log in to view this content"
 
-def increment_string(tag_string):
+def add_leading_zeros(number, places):
+    # convert the number to a string
+    _n_str = str(number)
+    _delta = places - len(_n_str)
+    for i in range(0, _delta):
+        _n_str = "0" + _n_str
+    return _n_str
+
+def increment_string(input_string):
 
     numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
     letters = [
@@ -23,15 +31,90 @@ def increment_string(tag_string):
             ]
 
     # find if character ends in a number or letter
-    if tag_string[len(tag_string)] in numbers:
+    if input_string[len(input_string)-1] in numbers:
         # NUMBER MODE
-        pass
+        # start from the right and find the index of the
+        # last number character
+        break_index = None
+        for i in range(0, len(input_string)):
+            j = len(input_string) - (i + 1)
+            if input_string[j] in numbers:
+                continue
+            else:
+                break_index = j
+                break
+        
+        # if the last character is the only one that
+        # is a number, then assign that to the break
+        # index.
+        if break_index is None:
+            break_index = len(input_string) - 1
+        # end if
+
+        # gets the sub string
+        sub_string = input_string[break_index+1:]
+        sub_string_len = len(sub_string)
+
+        # converts it to an integer
+        _int = int(sub_string)
+
+        # adds one to the integer
+        new_int = _int + 1
+
+        # converts the integer back to a string
+        new_substring = str(new_int)
+
+        # check and make sure the new substring is
+        # the same length. If they are not, add leading
+        # zeros
+        if len(sub_string) > len(new_substring):
+            _delta = len(sub_string) - len(new_substring)
+            for i in range(0, _delta):
+                new_substring = "0" + new_substring
+            # end for
+        # end if
+
+        # recompose the string, and return it
+        return input_string[0:break_index+1] + new_substring
+
     else:
         # LETTER MODE
-        pass
+        # loop through string from the right, until it finds
+        # a character that is not "Z", or finds an integer
+        start_position = None
+        for i in range(0, len(input_string)):
+            j = len(input_string) - (i + 1)
+            if input_string[j].upper() in letters:
+                if input_string[j].upper() != 'Z':
+                    start_position = j
+                    break
+                else:
+                    continue
+                # end if
+            else:
+                start_position = j
+                break
+            # end if
+        # end for
+        #print('start_position = %s' % start_position)
+        #print('len = %s' % len(tag_string))
+
+        # loop through and add the letters
+        new_string = input_string
+        if input_string[start_position] not in letters and input_string[-1].upper() == 'Z':
+            new_string = input_string + 'A'
+        else:
+            for i in range(start_position, len(input_string)):
+                if input_string[i].upper() == 'Z':
+                    # swaps the string
+                    new_string = new_string[0:i] + 'A' + new_string[i+1:]
+                else:
+                    char_index = letters.index(input_string[i])
+                    new_char = letters[char_index+1]
+                    new_string = new_string[0:i] + new_char + new_string[i+1:]
+        return new_string
     # end if
-
-
+# end increment string
 
 # Create your views here.
 class CustomerListView(LoginRequiredMixin, ListView):
@@ -136,6 +219,7 @@ class IOListUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
 
 class IOListDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = IOList
+    success_url = reverse_lazy('iolist-list')
 
 class FullIOListView(LoginRequiredMixin, NextUrlMixin, TemplateView):
     model = Chassis
@@ -193,6 +277,7 @@ class ChassisUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
 
 class ChassisDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Chassis
+    success_url = reverse_lazy('chassis-list')
 
 # card views
 class CardListView(LoginRequiredMixin, ListView):
@@ -207,10 +292,14 @@ class CardCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
         if 'chassis' in self.kwargs:
             chassis = get_object_or_404(Chassis, pk=self.kwargs['chassis'])
             next_slot = chassis.next_slot
-            return {
+            return_dict = {
                 'chassis':chassis,
-                'slot':next_slot
+                'slot':next_slot,
+                'make':'Allen Bradley'
             }
+
+            return_dict['name'] = chassis.name.upper() + "S" + add_leading_zeros(next_slot,2)
+            return return_dict
 
 class CardUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Card
@@ -220,7 +309,7 @@ class CardUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
 
 class CardDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Card
-
+    success_url = reverse_lazy('card-list')
 
 # point views
 class PointListView(LoginRequiredMixin, ListView):
@@ -236,18 +325,38 @@ class PointCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
         if 'card_id' in self.kwargs:
             card_id = self.kwargs['card_id']
             card = get_object_or_404(Card, pk=card_id)
-            return{
+            name = card.chassis.name.upper() + "S" + add_leading_zeros(card.slot, 2) + "P" + add_leading_zeros(card.next_point, 2)
+
+            # gets the type if there are other points specified
+            types = card.point_set.all().values_list('type', flat=True)
+
+            _return_object = {
                 'card':card,
-                'number':card.next_point
+                'number':card.next_point,
+                'tag':name,
+                'description_1':'Spare',
             }
+            
+            if len(types) > 0:
+                _return_object['type'] = types[0]
+                for i in Point.TYPES:
+                    if i[0] == types[0]:
+                        _return_object['description_2'] = i[1]
+                        break
+
+            return _return_object
 
 class PointUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Point
     fields = model_fields['Point']['form']
+    success_url = reverse_lazy('iolist-list')
 
 class PointDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Point
 
+    # this deletes the record without confirmation
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
 # bank views
 class BankListView(LoginRequiredMixin, ListView):

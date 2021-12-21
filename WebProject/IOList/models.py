@@ -35,10 +35,15 @@ model_fields = {
             'list':['tag', 'address', 'description_1', 'description_2', 'description_3', 'description_4'],
             'form':['card', 'number', 'type', 'tag', 'description_1', 'description_2', 'description_3', 
             'description_4', 'user_address'],
+        },
+    'ValveBank':
+        {
+            'list':[],
+            'form':[],
         }
 }
 
-def validate_unique_tag(iolist, tag):
+def validate_unique_tag(iolist, tag, update_object=None):
     # returns true or false, if false, the user
     # should raise a validation error
 
@@ -48,21 +53,30 @@ def validate_unique_tag(iolist, tag):
         tag=tag
     )
     if _points.exists():
-        return False
+        #if type(update_object) is not Point or len(_points) > 1 \
+        #    or _points[0].pk != update_object.pk:
+        #    return False
+        if type(update_object) is not Point or update_object.pk is None \
+            or len(_points) > 1 or _points[0].pk != update_object.pk:
+            return False
 
     # second look in the bus device table
     _bus_devices = BusDevice.objects.filter(
         io_list=iolist, tag=tag
     )
     if _bus_devices.exists():
-        return False
+        if type(update_object) is not BusDevice or update_object.pk is None \
+            or len(_bus_devices) > 1 or _bus_devices[0].pk != update_object.pk:
+            return False
 
     # third look in the solenoid table
     _solenoids = Solenoid.objects.filter(
         bank__io_list=iolist, tag=tag
     )
     if _solenoids.exists():
-        return False
+        if type(update_object) is not Solenoid or update_object.pk is None \
+            or len(_solenoids) > 1 or _solenoids[0].pk != update_object.pk:
+            return False
 
     # if it got here, then it is validated
     return True
@@ -127,13 +141,16 @@ class Chassis(Device):
     @property
     def next_slot(self):
         slots = Card.objects.filter(chassis=self).values_list("slot", flat=True)
-        for i in range(1, max(slots)+1):
-            if i in slots:
-                continue
-            else:
-                return i
-        # end for
-        return i+1
+        if len(slots) > 0:
+            for i in range(1, max(slots)+1):
+                if i in slots:
+                    continue
+                else:
+                    return i
+            # end for
+            return i+1
+        else:
+            return 1
 
     def __str__(self):
         return self.name
@@ -194,7 +211,7 @@ class Solenoid(models.Model):
     def validate_unique(self, *args, **kwargs):
         super(Solenoid, self).validate_unique(*args, **kwargs)
         if hasattr(self, "bank") and hasattr(self, "tag"):
-            _validated = validate_unique_tag(self.bank.io_list, self.tag)
+            _validated = validate_unique_tag(self.bank.io_list, self.tag, update_object=self)
             if not _validated:
                 raise ValidationError(
                         message = "Tag collision on io list.",
@@ -211,7 +228,7 @@ class Card(Device):
 
     # address template
     # variables $RACK$, $SLOT$, $TYPE$, $POINT$
-    address_template = models.CharField(max_length=256, null=True, blank=True)
+    address_template = models.CharField(verbose_name="Point Address Template", max_length=256, null=True, blank=True)
     
     @property
     def next_point(self):
@@ -309,11 +326,13 @@ class Point(models.Model):
             else:
 
                 # get the card address template if there is one, and upper case it
-                _address_template = self.card.address_template.upper()
+                _address_template = self.card.address_template
                 _string = _address_template
 
                 if "$RACK$" in _address_template:
                     _string = _string.replace("$RACK$", self.card.chassis.name)
+                if "$CHASSIS$" in _address_template:
+                    _string = _string.replace("$CHASSIS$", self.card.chassis.name)
                 if "$TYPE$" in _address_template:
                     _string = _string.replace("$TYPE$", self.__io_type__())
                 if "$SLOT$" in _address_template:
@@ -330,7 +349,10 @@ class Point(models.Model):
     def validate_unique(self, *args, **kwargs):
         super(Point, self).validate_unique(*args, **kwargs)
         if hasattr(self, 'card') and hasattr(self, 'tag'):
-            _valid = validate_unique_tag(self.card.chassis.io_list, self.tag)
+
+            # we should only call this on a create or if the tag has changed
+            _valid = validate_unique_tag(self.card.chassis.io_list, self.tag, update_object=self)
+            
             if not _valid:
                 raise ValidationError(
                      message = "Tag collision on io list.",
@@ -352,7 +374,7 @@ class BusDevice(Device):
     def validate_unique(self, *args, **kwargs):
         super(BusDevice, self).validate_unique(*args, **kwargs)
         if hasattr(self, 'io_list') and hasattr(self, 'tag'):
-            _valid = validate_unique_tag(self.io_list, self.tag)
+            _valid = validate_unique_tag(self.io_list, self.tag, update_object=self)
             if not _valid:
                 raise ValidationError(
                      message = "Tag collision on io list.",
