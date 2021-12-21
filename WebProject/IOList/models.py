@@ -22,8 +22,19 @@ model_fields = {
         },
     'Chassis':
         {
-            'list':['make', 'part_number', 'description', 'name', 'address'],
-            'form':['make', 'part_number', 'description', 'name', 'address'],
+            'list':['io_list', 'make', 'part_number', 'description', 'name', 'address'],
+            'form':['io_list', 'make', 'part_number', 'description', 'name', 'address'],
+        },
+    'Card':
+        {
+            'list':['chassis', 'name', 'make', 'part_number', 'description', 'slot'],
+            'form':['chassis', 'name', 'make', 'part_number', 'description', 'slot', 'address_template'],
+        },
+    'Point':
+        {
+            'list':['tag', 'address', 'description_1', 'description_2', 'description_3', 'description_4'],
+            'form':['card', 'number', 'type', 'tag', 'description_1', 'description_2', 'description_3', 
+            'description_4', 'user_address'],
         }
 }
 
@@ -113,6 +124,17 @@ class Chassis(Device):
     name = models.CharField(max_length=26)
     address = models.CharField(max_length=20)
 
+    @property
+    def next_slot(self):
+        slots = Card.objects.filter(chassis=self).values_list("slot", flat=True)
+        for i in range(1, max(slots)+1):
+            if i in slots:
+                continue
+            else:
+                return i
+        # end for
+        return i+1
+
     def __str__(self):
         return self.name
 
@@ -183,12 +205,29 @@ class Solenoid(models.Model):
         unique_together = ('bank', 'number')
 
 class Card(Device):
+    name = models.CharField(max_length=140)
     chassis = models.ForeignKey(Chassis, on_delete=models.CASCADE)
     slot = models.IntegerField()
 
     # address template
     # variables $RACK$, $SLOT$, $TYPE$, $POINT$
     address_template = models.CharField(max_length=256, null=True, blank=True)
+    
+    @property
+    def next_point(self):
+        points = Point.objects.filter(card=self).values_list('number', flat=True)
+        if len(points) > 0:
+            for i in range(0, max(points)+1):
+                if i in points:
+                    continue
+                else:
+                    return i
+                # end if
+            # end for
+            return i+1
+        else:
+            return 0
+
     class Meta:
         unique_together = ('chassis', 'slot')
 
@@ -274,13 +313,15 @@ class Point(models.Model):
                 _string = _address_template
 
                 if "$RACK$" in _address_template:
-                    _string = _string.replace("$RACK$", self.card.rack.name)
+                    _string = _string.replace("$RACK$", self.card.chassis.name)
                 if "$TYPE$" in _address_template:
                     _string = _string.replace("$TYPE$", self.__io_type__())
                 if "$SLOT$" in _address_template:
                     _string = _string.replace("$SLOT$", str(self.card.slot))
                 if "$NUMBER$" in _address_template:
                     _string = _string.replace("$NUMBER$", str(self.number))
+                if "$POINT$" in _address_template:
+                    _string = _string.replace("$POINT$", str(self.number))
         else:
             _string = self.user_address
             

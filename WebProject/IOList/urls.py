@@ -84,6 +84,11 @@ urlpatterns = [
     path('point/update/<pk>/', PointUpdateView.as_view(), name='point-update'),
     path('point/delete/<pk>/', PointDeleteView.as_view(), name='point-delete'),
 
+    # point card views
+    path('<int:card_id>/point/list/', PointListView.as_view(), name='card-point-list'),
+    path('<int:card_id>/point/create/', PointCreateView.as_view(), name='card-point-create'),
+
+
     # valve bank views
     path('bank/list/', BankListView.as_view(), name='bank-list'),
     path('bank/create/', BankCreateView.as_view(), name='bank-create'),

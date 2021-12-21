@@ -13,6 +13,26 @@ from .mixins import NextUrlMixin
 
 PERMISSION_DENIED_MESSAGE = "You must log in to view this content"
 
+def increment_string(tag_string):
+
+    numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
+    letters = [
+                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K',
+                'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V',
+                'W', 'X', 'Y', 'Z'
+            ]
+
+    # find if character ends in a number or letter
+    if tag_string[len(tag_string)] in numbers:
+        # NUMBER MODE
+        pass
+    else:
+        # LETTER MODE
+        pass
+    # end if
+
+
+
 # Create your views here.
 class CustomerListView(LoginRequiredMixin, ListView):
     model = Customer
@@ -131,6 +151,7 @@ class FullIOListView(LoginRequiredMixin, NextUrlMixin, TemplateView):
             valve_banks = ValveBank.objects.filter(io_list=iolist)
             bus_devices = BusDevice.objects.filter(io_list=iolist)
 
+            context['iolist'] = iolist
             context['chassis'] = chassis
             context['valve_banks'] = valve_banks
             context['bus_devices'] = bus_devices
@@ -158,11 +179,11 @@ class ChassisCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     success_url = reverse_lazy('chassis-list')
 
     def get_initial(self):
-        if 'iolist' in self.kwargs:
-            iolist_id = self.kwargs['iolist']
+        if 'iolist_id' in self.kwargs:
+            iolist_id = self.kwargs['iolist_id']
             iolist = get_object_or_404(IOList, pk=iolist_id)
             return {
-                'iolist':iolist
+                'io_list':iolist
             }
 
 class ChassisUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
@@ -179,9 +200,23 @@ class CardListView(LoginRequiredMixin, ListView):
 
 class CardCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Card
+    fields = model_fields['Card']['form']
+    success_url = reverse_lazy('cards-list')
+
+    def get_initial(self):
+        if 'chassis' in self.kwargs:
+            chassis = get_object_or_404(Chassis, pk=self.kwargs['chassis'])
+            next_slot = chassis.next_slot
+            return {
+                'chassis':chassis,
+                'slot':next_slot
+            }
 
 class CardUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Card
+    fields = model_fields['Card']['form']
+    success_url = reverse_lazy('cards-list')
+
 
 class CardDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Card
@@ -190,12 +225,25 @@ class CardDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
 # point views
 class PointListView(LoginRequiredMixin, ListView):
     model = Point
+    fields = model_fields['Point']['list']
 
 class PointCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Point
+    fields = model_fields['Point']['form']
+    success_url = reverse_lazy('point-list')
+
+    def get_initial(self):
+        if 'card_id' in self.kwargs:
+            card_id = self.kwargs['card_id']
+            card = get_object_or_404(Card, pk=card_id)
+            return{
+                'card':card,
+                'number':card.next_point
+            }
 
 class PointUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Point
+    fields = model_fields['Point']['form']
 
 class PointDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Point
