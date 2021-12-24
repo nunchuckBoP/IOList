@@ -19,93 +19,78 @@
                 <th>IO List</th>
                 <td>{{ iolist }}</td>
             </tr>
+            <tr>
+                <th>Actions</th>
+                <td>
+                    <a href="#" class="btn btn-primary">Add Chassis</a>
+                    <a href="#" class="btn btn-primary">Edit Info</a>
+                </td>
+            </tr>
         </table>
     {% endif %}
-
-    <div class='container'>
-        <span style="float: left;"><h3>Chassis</h3></span>
-    </div>
-    <div id="scoped-content">
-        <style type="text/css" scoped>
-            table, th, td {
-                vertical-align: text-bottom;
-            }
-        </style>
-        <table class='table'>
-            {% if chassis %}
-                {% for c in chassis %}
-                    <tr> 
-                        <th>Rack Name</th>
-                        <th colspan="4">Description</th>
-                        <th>Make</th>
-                        <th>Part Number</th>
-                        <th>Address</th>
-                        <td><a class="btn btn-primary" href="{% url 'iolist-chassis-create' iolist_id=iolist.pk %}?next={{ request.path }}">Add Chassis</a></td>
-                    </tr>
-                    <tr style="background-color: lightsalmon;">
-                        <td>{{ c.name }}</td>
-                        <td colspan="4">{{ c.description }}</td>
-                        <td>{{ c.make }}</td>
-                        <td>{{ c.part_number }}</td>
-                        <td>{{ c.address }}</td>
-                        <td><a href="{% url 'chassis-update' pk=c.pk %}?next={{ request.path }}">Edit</a></td>
-                    </tr>
-                    <tr>
-                        <th>Card Name</th>
-                        <th colspan="4">Description</th>
-                        <th>Make</th>
-                        <th>Part Number</th>
-                        <th>Slot</th>
-                        <td><a href="{% url 'chassis-card-create' chassis=c.pk %}?next={{ request.path }}" class="btn btn-primary">Add Card</a></td>
-                    </tr>
-                    {% if c.card_set.all %}
-                        {% for card in c.card_set.all %}
-                            <tr style="background-color: rgb(203, 220, 236);">
-                                <td>{{ card.name }}</td>
-                                <td colspan="4">{{ card.description }}</td>
-                                <td>{{ card.make }}</td>
-                                <td>{{ card.part_number }}</td>
-                                <td>{{ card.slot }}</td>
-                                <td><a href="{% url 'card-update' pk=card.pk %}?next={{ request.path }}">Edit</a></td>
-                            </tr>
-                            <tr>
-                                <th>Rack</th>
-                                <th>Slot</th>
-                                <th>Tag</th>
-                                <th>Address</th>
-                                <th>Description 1</th>
-                                <th>Description 2</th>
-                                <th>Description 3</th>
-                                <th>Description 4</th>
-                                <td><a href="{% url 'card-point-create' card_id=card.pk %}?next={{ request.path }}" class='btn btn-primary'>Add Point</a></td>
-                                {% for p in card.point_set.all %}
-                                    <tr>
-                                        <td>{{ p.card.chassis.name }}</td>
-                                        <td>{{ p.card.slot }}</td>
-                                        <td>{{ p.tag }}</td>
-                                        <td>{{ p.address }}</td>
-                                        <td>{{ p.description_1|default_if_none:''}}</td>
-                                        <td>{{ p.description_2|default_if_none:''}}</td>
-                                        <td>{{ p.description_3|default_if_none:''}}</td>
-                                        <td>{{ p.description_4|default_if_none:''}}</td>
-                                        <td><a href="{% url 'point-update' pk=p.pk %}?next={{ request.path }}">Edit</a></td>
-                                    </tr>
-                                {% endfor %}
-                            </tr>
-                        {% endfor %}
-                    {% else %}
-                        <tr>
-                            <td colspan="5">No Cards In Chassis</td>
-                        </tr>
-                    {% endif %}
-                {% endfor %}
-            {% else %}
+ 
+    {% if chassis %}
+        {% for c in chassis %}
+            <br />
+            <!-- Chassis information on top of the point / card table -->
+            <table class="table">
                 <tr>
-                    <td colspan="5">No Chassis in IO List</td>
+                    <th>Rack</th>
+                    <th>Slot</th>
+                    <th>Point</th>
+                    <th>Tag</th>
+                    <th>Address</th>
+                    <th colspan="4">Description</th>
+                    <th>Actions</th>
                 </tr>
-            {% endif %}
-        </table>
-    </div>
+                <tr style="background-color: rgb(171, 144, 182);">
+                    <td>{{ c.name }}</td>
+                    <td>0</td>
+                    <td><!-- Point --></td>
+                    <td><!-- Tag --></td>
+                    <td><!-- Address --></td>
+                    <td><!-- Description 1 --></td>
+                    <td>{{ c.make }}</td>
+                    <td>{{ c.part_number }}</td>
+                    <td>{{ c.address }}</td>
+                    <td><a href="#" class="btn btn-primary pt-0 pb-0">Edit</a></td>
+                </tr>
+                {% if c.card_set.all %}
+                    {% for card in c.card_set.all %}
+                        <tr style="background-color: rgb(203, 220, 236);">
+                            <td>{{ c.name }}</td>
+                            <td>{{ card.slot }}</td>
+                            <td><!-- Point --></td>
+                            <td>{{ card.name }}</td>
+                            <td><!-- Address --></td>
+                            <td><!-- Description 1 --></td>
+                            <td><!-- Description 2 --></td>
+                            <td>{{ card.make }}</td>
+                            <td>{{ card.part_number }}</td>
+                            <td>Edit, Add Point</td>
+                        </tr>
+                        {% for p in card.point_set.all %}
+                                <tr>
+                                    <td>{{ p.card.chassis.name }}</td>
+                                    <td>{{ p.card.slot }}</td>
+                                    <td>{{ p.number }}</td>
+                                    <td>{{ p.tag }}</td>
+                                    <td>{{ p.address }}</td>
+                                    <td>{{ p.description_1|default_if_none:''}}</td>
+                                    <td>{{ p.description_2|default_if_none:''}}</td>
+                                    <td>{{ p.description_3|default_if_none:''}}</td>
+                                    <td>{{ p.description_4|default_if_none:''}}</td>
+                                    <td><a href="{% url 'point-update' pk=p.pk %}?next={{ request.path }}">Edit</a></td>
+                                </tr>
+                            {% endfor %}
+                    {% endfor %}
+                {% endif %}
+            </table>
+        {% endfor %}
+    {% else %}
+
+
+    {% endif %}
 
     <h3>Valve Banks</h3>
     {% if valve_banks %}

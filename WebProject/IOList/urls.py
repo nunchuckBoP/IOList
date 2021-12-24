@@ -24,10 +24,13 @@ from .views import PointListView, PointCreateView, PointUpdateView, PointDeleteV
 from .views import BankListView, BankCreateView, BankUpdateView, BankDeleteView
 from .views import SolenoidListView, SolenoidCreateView, SolenoidUpdateView, SolenoidDeleteView
 from .views import BusDeviceListView, BusDeviceCreateView, BusDeviceUpdateView, BusDeviceDeleteView
-from .views import FullIOListView
+from .views import FullIOListView, HomeRedirectView
 
 urlpatterns = [
 #    path('admin/', admin.site.urls),
+
+    # home landing page
+    path('', HomeRedirectView.as_view(), name='index'),
 
     # customer views
     path('customer/list/', CustomerListView.as_view(), name='customer-list'),

@@ -4,7 +4,7 @@ from django.http.response import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import CreateView, ListView, UpdateView, DeleteView
+from django.views.generic import CreateView, ListView, UpdateView, DeleteView, RedirectView
 from django.views.generic.base import TemplateView
 from .models import model_fields
 from .models import BusDevice, Card, Chassis, Customer, IOList, Plant, Point, Solenoid, ValveBank
@@ -115,6 +115,9 @@ def increment_string(input_string):
         return new_string
     # end if
 # end increment string
+
+class HomeRedirectView(RedirectView):
+    pattern_name = 'customer-list'
 
 # Create your views here.
 class CustomerListView(LoginRequiredMixin, ListView):
