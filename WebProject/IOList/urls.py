@@ -98,16 +98,29 @@ urlpatterns = [
     path('bank/update/<pk>/', BankUpdateView.as_view(), name='bank-update'),
     path('bank/delete/<pk>/', BankDeleteView.as_view(), name='bank-delete'),
 
+    # io list valve bank views
+    path('<int:iolist_id>/bank/list/', BankListView.as_view(), name='iolist-bank-list'),
+    path('<int:iolist_id>/bank/create/', BankCreateView.as_view(), name='iolist-bank-create'),
+
     # solenoid views
     path('solenoid/list/', SolenoidListView.as_view(), name='solenoid-list'),
     path('solenoid/create/', SolenoidCreateView.as_view(), name='solenoid-create'),
     path('solenoid/update/<pk>/', SolenoidUpdateView.as_view(), name='solenoid-update'),
     path('solenoid/delete/<pk>/', SolenoidDeleteView.as_view(), name='solenoid-delete'),
 
+    #valve bank - solenoid views
+    path('<int:valvebank_id>/solenoid/list/', SolenoidListView.as_view(), name='bank-solenoid-list'),
+    path('<int:valvebank_id>/solenoid/create/', SolenoidCreateView.as_view(), name='bank-solenoid-create'),
+
+
     # bus device views
     path('busdevice/list/', BusDeviceListView.as_view(), name='busdevice-list'),
     path('busdevice/create/', BusDeviceCreateView.as_view(), name='busdevice-create'),
     path('busdevice/update/<pk>/', BusDeviceUpdateView.as_view(), name='busdevice-update'),
     path('busdevice/delete/<pk>/', BusDeviceDeleteView.as_view(), name='busdevice-delete'),
+
+    # io list bus device views
+    path('<int:iolist_id>/busdevice/list/', BusDeviceListView.as_view(), name='iolist-busdevice-list'),
+    path('<int:iolist_id>/busdevice/create/', BusDeviceCreateView.as_view(), name='iolist-busdevice-create'),
 
 ]

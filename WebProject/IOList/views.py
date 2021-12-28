@@ -140,6 +140,7 @@ class CustomerDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Customer
     fields = model_fields['Customer']['form']
     success_url = reverse_lazy('customer-list')
+    template_name = 'delete_form.html'
 
 # location views
 class LocationListView(LoginRequiredMixin, ListView):
@@ -223,6 +224,7 @@ class IOListUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
 class IOListDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = IOList
     success_url = reverse_lazy('iolist-list')
+    template_name = 'delete_form.html'
 
 class FullIOListView(LoginRequiredMixin, NextUrlMixin, TemplateView):
     model = Chassis
@@ -281,6 +283,7 @@ class ChassisUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
 class ChassisDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Chassis
     success_url = reverse_lazy('chassis-list')
+    template_name = 'delete_form.html'
 
 # card views
 class CardListView(LoginRequiredMixin, ListView):
@@ -313,6 +316,7 @@ class CardUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
 class CardDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Card
     success_url = reverse_lazy('card-list')
+    template_name = 'delete_form.html'
 
 # point views
 class PointListView(LoginRequiredMixin, ListView):
@@ -364,40 +368,90 @@ class PointDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
 # bank views
 class BankListView(LoginRequiredMixin, ListView):
     model = ValveBank
+    fields = model_fields['ValveBank']['list']
 
 class BankCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = ValveBank
+    fields = model_fields['ValveBank']['form']
+
+    def get_initial(self):
+        if 'iolist_id' in self.kwargs:
+            iolist_id = self.kwargs['iolist_id']
+            io_list = get_object_or_404(IOList, pk=iolist_id)
+
+            _return_object = {
+                'io_list':io_list
+            }
+
+            return _return_object
 
 class BankUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = ValveBank
+    fields = model_fields['ValveBank']['form']
 
 class BankDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = ValveBank
+    template_name = 'delete_form.html'
 
 
 # solenoid views
 class SolenoidListView(LoginRequiredMixin, ListView):
     model = Solenoid
+    fields = model_fields['Solenoid']['list']
 
 class SolenoidCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = Solenoid
+    fields = model_fields['Solenoid']['form']
+
+    def get_initial(self):
+        if 'valvebank_id' in self.kwargs:
+            valvebank_id = self.kwargs['valvebank_id']
+            bank = get_object_or_404(ValveBank, pk=valvebank_id)
+            next_bank = str(bank.next_valve_number())
+            return_object = {
+                'bank':bank,
+                'number':bank.next_valve_number(),
+                'tag':bank.name + "SP" + next_bank,
+                'description_1':'Spare',
+                'description_2':'Solenoid',
+                'description_3': next_bank,
+            }
+
+            return return_object
 
 class SolenoidUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = Solenoid
+    fields = model_fields['Solenoid']['form']
 
 class SolenoidDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = Solenoid
-
+    
+    # this deletes the record without confirmation
+    def get(self, request, *args, **kwargs):
+        return self.post(request, *args, **kwargs)
 
 # bus device views
 class BusDeviceListView(LoginRequiredMixin, ListView):
     model = BusDevice
+    fields = model_fields['BusDevice']['list']
 
 class BusDeviceCreateView(LoginRequiredMixin, NextUrlMixin, CreateView):
     model = BusDevice
+    fields = model_fields['BusDevice']['form']
+
+    def get_initial(self):
+        if 'iolist_id' in self.kwargs:
+            iolist_id = self.kwargs['iolist_id']
+            io_list = get_object_or_404(IOList, pk=iolist_id)
+            return_object = {
+                'io_list':io_list
+            }
+            return return_object
 
 class BusDeviceUpdateView(LoginRequiredMixin, NextUrlMixin, UpdateView):
     model = BusDevice
+    fields = model_fields['BusDevice']['form']
 
 class BusDeviceDeleteView(LoginRequiredMixin, NextUrlMixin, DeleteView):
     model = BusDevice
+    template_name = 'delete_form.html'

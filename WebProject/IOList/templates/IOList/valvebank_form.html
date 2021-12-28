@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %}Valve Bank Form{% endblock %}
+
+{% block heading %}Valve Bank Form{% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}
+    <div>
+        <h4>Instructions</h4>
+        <p>
+            Solenoid address template variables. Example, $RACK$:$TYPE$:DATA[$SLOT$].$POINT$
+        </p>
+        <table class='table'>
+            <tr>
+                <th>$RACK$</th><td>Rack / Chassis Name</td>
+                <th>$GROUP$</th><td>Group of solenoid (based on number)</td>
+                <th>$BIT$</th><td>Bit of solendoid (based on number)</td>
+            </tr>
+        </table>
+    </div>
+    <form method="POST" novalidate>
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-primary float-left">Save</button>
+        <a href="{{ next }}" class='btn btn-secondary ml-2'>Cancel</a>
+        {% if object.pk %}
+            <a href="{% url 'bank-delete' pk=object.pk %}?next={{ next }}" class='btn btn-danger float-right'>Delete</a>
+        {% endif %}
+    </form>
+{% endblock %}

@@ -1,0 +1,23 @@
+
+{% extends "base.html" %}
+
+{% block title %}Object Delete{% endblock %}
+
+{% block heading %}Object Delete{% endblock %}
+
+{% load crispy_forms_tags %}
+
+{% block content %}    
+    <h1>Are you sure you want to delete?</h1><br>
+    <p>This operation cannot be undone. There are child objects that will also be deleted.</p><br>
+    <table>
+        <tr>
+            <th>Object</th><td>{{ object }}</td>
+        </tr>
+    </table><br>
+    <form method="post" action="">
+        {% csrf_token %}
+        <input class="btn btn-danger" type="submit" value="Yes" />
+        <a href="{{ next }}"><div class="btn btn-primary">Cancel</div></a>
+    </form>
+{% endblock %}

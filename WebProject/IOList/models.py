@@ -38,8 +38,18 @@ model_fields = {
         },
     'ValveBank':
         {
-            'list':[],
-            'form':[],
+            'list':['io_list', 'name', 'address', 'make', 'part_number', 'description', 'data_format', 'valve_count', 'address_template'],
+            'form':['io_list', 'name', 'address', 'make', 'part_number', 'description', 'data_format', 'valve_count', 'address_template'],
+        },
+    'Solenoid':
+        {
+            'list':['bank', 'number', 'tag', 'description_1', 'description_2', 'description_3', 'description_4', 'user_address'],
+            'form':['bank', 'number', 'tag', 'description_1', 'description_2', 'description_3', 'description_4', 'user_address'],
+        },
+    'BusDevice':
+        {
+            'list':['io_list', 'make', 'part_number', 'description', 'address', 'chassis', 'tag', 'description_1', 'description_2', 'description_3'],
+            'form':['io_list', 'make', 'part_number', 'description', 'address', 'chassis', 'tag', 'description_1', 'description_2', 'description_3'],
         }
 }
 
@@ -157,8 +167,13 @@ class Chassis(Device):
 
     class Meta:
         unique_together = ('io_list', 'address')
+        ordering = ['address']
 
-class ValveBank(Chassis):
+class ValveBank(Device):
+    io_list = models.ForeignKey(IOList, on_delete=models.CASCADE)
+    name = models.CharField(max_length=20)
+    address = models.CharField(max_length=20)
+
     SINT_DATA = 4
     INT_DATA = 8
     FORMATS = [
@@ -168,6 +183,23 @@ class ValveBank(Chassis):
     data_format = models.IntegerField(choices=FORMATS)
     valve_count = models.IntegerField()
     address_template = models.CharField(max_length=82, blank=True, null=True)
+
+    def next_valve_number(self):
+        solenoid_numbers = Solenoid.objects.filter(bank=self).values_list("number", flat=True)
+        if len(solenoid_numbers) > 0:
+            for i in range(0, max(solenoid_numbers)+1):
+                if i in solenoid_numbers:
+                    continue
+                else:
+                    return i
+            # end for
+            return i+1
+        else:
+            return 0
+
+    class Meta:
+        unique_together = ('io_list', 'address')
+        ordering = ['address']
 
 class Solenoid(models.Model):
     bank = models.ForeignKey(ValveBank, on_delete=models.CASCADE)
@@ -184,6 +216,14 @@ class Solenoid(models.Model):
 
     def __bit__(self):
         return self.number % self.bank.data_format
+
+    @property
+    def slot(self):
+        return self.__group__()
+
+    @property
+    def point(self):
+        return self.__bit__()
 
     @property
     def spare_tag(self):
@@ -206,7 +246,7 @@ class Solenoid(models.Model):
                     _address_string = _address_string.replace("$BIT$", str(self.__bit__()))
             else:
                 _address_string = self.bank.name + ":O.OutputArea[" + str(self.__group__()) + "]." + str(self.__bit__())
-        return _address_string.upper()
+        return _address_string
 
     def validate_unique(self, *args, **kwargs):
         super(Solenoid, self).validate_unique(*args, **kwargs)
@@ -220,6 +260,7 @@ class Solenoid(models.Model):
 
     class Meta:
         unique_together = ('bank', 'number')
+        ordering = ['number']
 
 class Card(Device):
     name = models.CharField(max_length=140)
@@ -247,6 +288,7 @@ class Card(Device):
 
     class Meta:
         unique_together = ('chassis', 'slot')
+        ordering = ['slot']
 
 class Point(models.Model):
     DISCRETE_INPUT = "DI"
@@ -361,10 +403,12 @@ class Point(models.Model):
 
     class Meta:
         unique_together = ('card', 'number')
+        ordering = ['number']
 
 class BusDevice(Device):
     io_list = models.ForeignKey(IOList, on_delete=models.CASCADE)
     address = models.CharField(max_length=26)
+    chassis = models.CharField(verbose_name="Chassis/Rack Name", max_length=20)
     tag = models.CharField(max_length=26)
     description_1 = models.CharField(verbose_name="Desc 1", max_length=26, blank=True, null=True)
     description_2 = models.CharField(verbose_name="Desc 2", max_length=26, blank=True, null=True)
@@ -383,3 +427,4 @@ class BusDevice(Device):
     
     class Meta:
         unique_together = ('io_list', 'tag')
+        ordering = ['address']
