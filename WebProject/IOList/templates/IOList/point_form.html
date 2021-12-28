@@ -7,6 +7,20 @@
 {% load crispy_forms_tags %}
 
 {% block content %}
+    <div>
+        <h4>Instructions</h4>
+        <p>
+            Point address template variables. Example, $RACK$:$TYPE$:DATA[$SLOT$].$POINT$
+        </p>
+        <table class='table'>
+            <tr>
+                <th>$RACK$</th><td>Rack / Chassis Name</td>
+                <th>$TYPE$</th><td>Input / Output of Point</td>
+                <th>$SLOT$</th><td>Slot Number of Card</td>
+                <th>$POINT$</th><td>Point / Channel Number</td>
+            </tr>
+        </table>
+    </div>
     <form method="POST" novalidate>
         {% csrf_token %}
         {{ form|crispy }}
