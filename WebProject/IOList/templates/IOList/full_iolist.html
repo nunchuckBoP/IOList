@@ -56,8 +56,15 @@
                     <td>{{ c.part_number }}</td>
                     <td>{{ c.address }}</td>
                     <td>
-                        <a href="{% url 'chassis-update' pk=c.pk %}?next={{ request.path }}" class="btn btn-primary pt-0 pb-0">Edit</a>
-                        <a href="{% url 'chassis-card-create' chassis=c.pk %}?next={{ request.path }}" class="btn btn-primary pt-0 pb-0">Add Card</a>
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-primary dropdown-toggle pt-0 pb-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Action
+                            </button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="{% url 'chassis-update' pk=c.pk %}?next={{ request.path }}">Edit</a>
+                                <a class="dropdown-item" href="{% url 'chassis-card-create' chassis=c.pk %}?next={{ request.path }}">Add Card</a>
+                            </div>
+                        </div>
                     </td>
                 </tr>
                 {% if c.card_set.all %}
@@ -73,8 +80,15 @@
                             <td>{{ card.make }}</td>
                             <td>{{ card.part_number }}</td>
                             <td>
-                                <a href="{% url 'card-update' pk=card.pk %}?next={{ request.path }}" class="btn btn-primary pt-0 pb-0">Edit</a>
-                                <a href="{% url 'card-point-create' card_id=card.pk %}?next={{ request.path }}" class="btn btn-primary pt-0 pb-0">Add Point</a>
+                                <div class="btn-group">
+                                    <button type="button" class="btn btn-primary dropdown-toggle pt-0 pb-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        Action
+                                    </button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="{% url 'card-update' pk=card.pk %}?next={{ request.path }}">Edit</a>
+                                        <a class="dropdown-item" href="{% url 'card-point-create' card_id=card.pk %}?next={{ request.path }}">Add Point</a>
+                                    </div>
+                                </div>
                             </td>
                         </tr>
                         {% for p in card.point_set.all %}
@@ -123,8 +137,15 @@
                 <td>{{ v.part_number }}</td>
                 <td>{{ v.address }}</td>
                 <td>
-                    <a href="{% url 'bank-update' pk=v.pk %}?next={{ request.path }}" class="btn btn-primary pt-0 pb-0">Edit</a>
-                    <a href="{% url 'bank-solenoid-create' valvebank_id=v.pk %}?next={{ request.path }}" class="btn btn-primary pt-0 pb-0">Add Valve</a>
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-primary dropdown-toggle pt-0 pb-0" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Action
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'bank-update' pk=v.pk %}?next={{ request.path }}">Edit</a>
+                            <a class="dropdown-item" href="{% url 'bank-solenoid-create' valvebank_id=v.pk %}?next={{ request.path }}">Add Valve</a>
+                        </div>
+                    </div>
                 </td>
             </tr>
             {% if v.solenoid_set.all %}
